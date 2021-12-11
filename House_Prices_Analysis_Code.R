@@ -11,11 +11,12 @@ library(lindia)
 
 # We first access and sort our table of 138 total responses.
 
-house_prices <- read_table2("house_prices.txt") %>% 
+house_prices <- read_table("house_prices.txt") %>% 
     rename(Bedrooms = Bedrms, Shower_Rooms = HaBaths) %>%
     arrange(desc(Price), desc(Rooms), desc(Baths), desc(Shower_Rooms), desc(Garages), desc(Place))
 attach(house_prices)
 Place <- as.factor(Place)
+print(house_prices)
 
 # We apply a multiple linear regression model, Yi = b0 + b1x1i + b2x2i + b3x3i + b4x4i + b5x5i + b6x6i + ei
 # for where i ranges from 1 to 138. We initially fit a "full" model. i.e. a model that considers all columns from 
@@ -293,16 +294,26 @@ data = house_prices_ALT)
 
 ####    Exploratory Analysis    ####
 
+# (Exploratory analysis conducted in final project pdf)
+
 summary(Model_noRooms)
 summary(Model_noRooms_ALT)
+
+
+# Here we print the retransformed coefficients for the roomless filtered model.
 
 for (i in coefficients(Model_noRooms_ALT)) {
     print((1/i)**2)
 }
 
+
+
 row_rep <- function(df, n) {
   df[rep(1:nrow(df), times = n),]
 }
+
+
+# Here we print the median house (in terms of the explanatory variables) in both Framington and Natick.
 
 averageHouse <- house_prices_ALT %>%
     summarise(Bedrooms = median(Bedrooms), Baths = median(Baths), Shower_Rooms = median(Shower_Rooms),
@@ -311,45 +322,26 @@ averageHouse <- house_prices_ALT %>%
     mutate(Place = c(0,1))
 averageHouse
 
-predict(Model_noRooms_ALT, averageHouse, level = 0.99, interval = "prediction")
 
+# We now predict the prices for the median house in Framington and Natick along with their prediction intervals.
+
+lst_index <- 1
 for (i in predict(Model_noRooms_ALT, averageHouse, level = 0.99, interval = "prediction")
 ) {
-    cat(i, "=", (1/i)**2, "/")
+    lst <- c("Fit_Framington", "Fit_Natick", "Upper_Framington", "Upper_Natick", "Lower_Framington", "Lower_Natick")
+    
+    cat(lst[lst_index], ": ", i, "->", (1/i)**2, "; ")
+    lst_index <- lst_index + 1
 }
-cat("fitF / fitN / uppF / uppN / lwrF / lwrN")
 
-# special realtivity 1 yes
-# stat mech          1 yes
-# fund prob          1 yes
-# complex networks   1 yes
-# general relativity 2 yes
-# biology            2 yes
-# stat inference     2 mayb
-# time series        2 yes
-# project            ALL mayb
-# comp sci           ? mayb
-# intro quantum      2 mayb
-
-blem <- house_prices_ALT %>%
-    filter(Place == 1) 
-plot(blem$Price)
-
-blom <- house_prices_ALT %>%
-    filter(Place == 0)
-plot(blom$Price)
-
+# Here we print all houses with variables equal to the dataset median values.  
 
 median_data_points <- house_prices_ALT %>%
     filter(Bedrooms == 4, Baths == 2, Shower_Rooms == 1, Garages == 2)
-print(median_data_points, n = 25)
+print(median_data_points, n = Inf)
 
+
+# Here we print how many datapoints we have for Framington and Natick respectively.
+
+house_prices_ALT %>% filter(Place == 0) %>% nrow()
 house_prices_ALT %>% filter(Place == 1) %>% nrow()
-
-
-bresid_vs_fitted_plot_ALT <- ggplot(Model_noRooms, aes(x=.fitted, y=.stdresid)) + geom_point() + 
-    geom_smooth( formula = y ~ x, colour = "red", se = FALSE, size = 0.7) + labs(title =
-    "Standardised Residuals Vs Fitted Values", x = "Fitted Values", y = "Standardised Residuals", subtitle =
-    "Altered Full Model", caption = "Fig.6") + 
-    geom_hline(yintercept = 0, colour = "black", linetype = "dashed")
-bresid_vs_fitted_plot_ALT
