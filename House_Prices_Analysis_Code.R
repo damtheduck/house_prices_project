@@ -6,7 +6,7 @@ library(readr)
 library(lindia)
 
 # The aim of our project here is to analyse the effect that the number of rooms, bedrooms, baths, showers,
-# garages, and location has on house prices. Our data is sampled from in the towns of Framington and
+# garages, and location has on house prices. Our data is sampled from in the towns of Farmington and
 # Natick, near Boston, USA.
 
 # We first access and sort our table of 138 total responses.
@@ -159,7 +159,7 @@ summary(Model_noRooms)
 # within a 70% threshold, lending rope to the sufficiency of our model for prediction. We see that our 
 # coefficient of determination is also at 70.41% for our roomless model.
 
-# Contextually, we can say that 70.41% of the variation in our select house prices in Framington and Natick is 
+# Contextually, we can say that 70.41% of the variation in our select house prices in Farmington and Natick is 
 # due to the fitted regeression of our model with respect either model. Here, when considering reduced 
 # models, a coefficient of determination closest to that of the maximumn (i.e. to that of the full model) is 
 # most desirable. Our reduced model perfectly satisfies this.
@@ -247,7 +247,7 @@ vif(Model_noRooms)
 
 # From our residual plots, we see one possible outlier with a standardised residual value of 2.979 (3.d.p). 
 # This residual correpsonds to the 19th observation with a fitted value of 0.0008423657 from an original of
-# 0.001154778. This observation is the house in Framington with a price of $749,900 with 26 rooms, 11 bedrooms, 
+# 0.001154778. This observation is the house in Farmington with a price of $749,900 with 26 rooms, 11 bedrooms, 
 # 7 baths, 2 shower rooms and 0 garages.
 
 # Assuing that this data point has not been recorded incorrectly we could consider continuing our analysis 
@@ -307,13 +307,13 @@ for (i in coefficients(Model_noRooms_ALT)) {
 }
 
 
+# Here we create a data frame for the median house (in terms of the explanatory variables) in both Farmington 
+# and Natick and use it to predict the its price in Farmington and Natick along with its 99% prediction intervals
+
 
 row_rep <- function(df, n) {
   df[rep(1:nrow(df), times = n),]
 }
-
-
-# Here we print the median house (in terms of the explanatory variables) in both Framington and Natick.
 
 averageHouse <- house_prices_ALT %>%
     summarise(Bedrooms = median(Bedrooms), Baths = median(Baths), Shower_Rooms = median(Shower_Rooms),
@@ -322,13 +322,10 @@ averageHouse <- house_prices_ALT %>%
     mutate(Place = c(0,1))
 averageHouse
 
-
-# We now predict the prices for the median house in Framington and Natick along with their prediction intervals.
-
 lst_index <- 1
 for (i in predict(Model_noRooms_ALT, averageHouse, level = 0.99, interval = "prediction")
 ) {
-    lst <- c("Fit_Framington", "Fit_Natick", "Upper_Framington", "Upper_Natick", "Lower_Framington", "Lower_Natick")
+    lst <- c("Fit_Farmington", "Fit_Natick", "Upper_Farmington", "Upper_Natick", "Lower_Farmington", "Lower_Natick")
     
     cat(lst[lst_index], ": ", i, "->", (1/i)**2, "; ")
     lst_index <- lst_index + 1
@@ -341,7 +338,7 @@ median_data_points <- house_prices_ALT %>%
 print(median_data_points, n = Inf)
 
 
-# Here we print how many datapoints we have for Framington and Natick respectively.
+# Here we print how many datapoints we have for Farmington and Natick respectively.
 
 house_prices_ALT %>% filter(Place == 0) %>% nrow()
 house_prices_ALT %>% filter(Place == 1) %>% nrow()
